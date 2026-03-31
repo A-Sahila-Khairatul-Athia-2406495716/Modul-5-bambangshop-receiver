@@ -86,4 +86,8 @@ This is the place for you to write reflections:
 
 #### Reflection Subscriber-1
 
+1. RwLock<> diperlukan karena Vec of Notifications diakses dari multiple threads secara bersamaan, sehingga tanpa lock bisa terjadi data race. Alasan kita tidak pakai Mutex<> adalah karena Mutex<> hanya mengizinkan satu thread mengakses data dalam satu waktu (baik untuk read maupun write). Sedangkan RwLock<> lebih fleksibel: banyak thread boleh read secara bersamaan (selama tidak ada thread yang sedang write), tetapi jika ada yang mau write, harus menunggu semua yang read selesai dahulu. Karena operasi read list notifikasi jauh lebih sering terjadi dibanding operasi write, RwLock<> lebih efisien di case ini.
+
+2. Di Java, kita bisa bebas mengubah static variable melalui static function tanpa masalah karena Java mengurus keamanannya saat runtime. Di Rust, semua pengecekan memory safety dan thread safety dilakukan saat compile time, bukan runtime. Rust tidak mengizinkan mutasi static variable secara langsung karena variable tersebut hidup sepanjang program berjalan dan bisa diakses dari multiple threads sekaligus, yang berpotensi menyebabkan data race. Oleh karena itu, kita butuh lazy_static untuk inisialisasi yang aman, dan membungkusnya dengan RwLock<> atau DashMap yang menjaga dan mengatur akses agar tetap thread-safe.
+
 #### Reflection Subscriber-2
